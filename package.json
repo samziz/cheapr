@@ -1,0 +1,11 @@
+{
+  "name": "cheapr",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"cd api && npm start\" \"cd front && npm run build && npm start\""
+  },
+  "dependencies": {
+    "eslint-config-skyscanner": "^3.0.0"
+  }
+}

@@ -1,0 +1,30 @@
+.map-box-container {
+	height: 100%;
+	width: 100%;
+
+	border-radius: 5px;
+
+	background-color: white;
+
+	-webkit-box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
+	-moz-box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
+	box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
+}
+
+.g-map-container {
+	height: 100%;
+	width: 100%;
+	border-radius: 5px;
+}
+
+a[href^="http://maps.google.com/maps"], 
+a[href^="https://maps.google.com/maps"],
+.gmnoprint a,
+.gmnoprint span,
+.gm-style-cc {
+	display:none !important
+}
+
+.gmnoprint div {
+    background:none !important;
+}
