@@ -17,6 +17,9 @@ export default function search(props) {
 				className='search-box-bar'
 				list='airports'
 				placeholder='Add a stop'
+				onKeyDown={(ev, val) => {
+					if (ev.keyCode == 13) props.onSubmit(ev.target.value)
+				}}
 			/>
 			<datalist id='airports'>
 				<option value='London' />

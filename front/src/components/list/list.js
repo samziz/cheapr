@@ -1,14 +1,32 @@
+import { connect } from 'react-redux';
+import Item from './item/item';
 import './list.css';
 import React from 'react';
 
-export default class List extends React.PureComponent {
+class List extends React.PureComponent {
 
 	render() {
-		const { stops } = this.props;
+		const { airports } = this.props;
 
 		return (
 			<div className='list-box-container'>
-				{!stops && this.makeEmptyMessage()}
+				{airports && this.makeList(airports)}
+				{!airports && this.makeEmptyMessage()}
+			</div>
+		)
+	}
+
+	makeList(airports) {
+		const items = airports.map(airport => (
+			<Item airport={airport} />
+		));
+
+		return (
+			<div className='list-box-list-container'>
+				{items}
+				<button className='list-box-list-button'>
+					Find route
+				</button>
 			</div>
 		)
 	}
@@ -23,3 +41,10 @@ export default class List extends React.PureComponent {
 		)
 	}
 }
+
+const mapStateToProps = state => ({
+	airports: state.airports,
+	updated: new Date()
+});
+
+export default connect(mapStateToProps)(List);
