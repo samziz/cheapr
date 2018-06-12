@@ -1,12 +1,14 @@
-import axios from 'axios';
+const axios = require('axios');
+const axiosConfig = require('../config/axios.config');
 
-export default class Skyscanner {
+
+class Skyscanner {
 			
 	// TODO: Unfinished example implementation
 
 	
 	constructor(token) {
-		this.axios = axios.create(this.axiosConfig);
+		this.axios = axios.create(axiosConfig(token));
 	}
 
 	findCheaperDatesForRoute(orig, dest, start, end) {		
@@ -25,20 +27,6 @@ export default class Skyscanner {
 	_formatUrlQuery(arr) {
 		return arr.join('/');
 	}
-
-
-	/* Constants */
-
-	axiosConfig = {
-        baseUrl: 'http://partners.api.skyscanner.net/apiservices/',
-        timeout: 2000,
-        headers: {
-        	Accept: 'application/json'
-        },
-        defaults: {
-        	params: {
-        		apiKey: token
-        	}
-        }
-	}
 }
+
+module.exports = Skyscanner;

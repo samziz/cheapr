@@ -1,5 +1,5 @@
-import Skyscanner from '../requests/skyscanner.request';
+const Skyscanner = require('../requests/skyscanner.request');
 
-export const get = (req, res) => {
-	
+exports.get = (req, res) => {
+
 }
