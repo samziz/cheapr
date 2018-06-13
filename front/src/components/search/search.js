@@ -2,7 +2,7 @@ import React from 'react';
 import './search.css';
 
 export default function search(props) {
-	const { airports } = props;
+	const { cities } = props;
 
 	return (
 		<div className='search-box-container'>
@@ -11,17 +11,18 @@ export default function search(props) {
 					className='search-box-logo'
 					draggable={false}
 					src='/logo.png'
+					alt='cheapr-logo'
 				/>
 			</div>
 			<input 
 				className='search-box-bar'
-				list='airports'
+				list='cities'
 				placeholder='Add a stop'
 				onKeyDown={(ev, val) => {
-					if (ev.keyCode == 13) props.onSubmit(ev.target.value)
+					if (ev.keyCode === 13) props.onSubmit(ev.target.value)
 				}}
 			/>
-			<datalist id='airports'>
+			<datalist id='cities'>
 				<option value='London' />
 				<option value='Paris' />
 				<option value='Amsterdam' />

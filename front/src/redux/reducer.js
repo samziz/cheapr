@@ -5,7 +5,7 @@ export default function (state = initialState, action) {
     case 'SET_ITEMS':
         return {
             ...state,
-            airports: action.payload,
+            cities: action.payload,
         };
     default:
         return state;

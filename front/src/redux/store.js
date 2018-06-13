@@ -1,12 +1,13 @@
 import { createStore } from 'redux';
-import reducer from './reducer';
+import initialState from './state';
 import { loadState, saveState } from './local';
+import reducer from './reducer';
 
 let store;
 
 store = createStore(
     reducer,
-    { ...loadState() },
+    { ...loadState() || initialState },
 );
 
 store.subscribe(() => {

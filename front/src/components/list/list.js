@@ -6,44 +6,37 @@ import React from 'react';
 class List extends React.PureComponent {
 
 	render() {
-		const { airports } = this.props;
+		const { cities } = this.props;
 
 		return (
 			<div className='list-box-container'>
-				{airports && this.makeList(airports)}
-				{!airports && this.makeEmptyMessage()}
+				{cities && this.makeList(cities)}
+				<div className='list-box-list-button-container'>
+					<button className='list-box-list-button' disabled={cities.length === 0}>
+						Find route
+					</button>
+				</div>
 			</div>
 		)
 	}
 
-	makeList(airports) {
-		const items = airports.map(airport => (
-			<Item airport={airport} />
+	makeList(cities) {
+		const items = cities.map(city => (
+			<Item city={city} onChange={val => this.props.setDays(city.title, val)} />
 		));
 
 		return (
 			<div className='list-box-list-container'>
 				{items}
-				<button className='list-box-list-button'>
-					Find route
-				</button>
+				
 			</div>
 		)
 	}
 
-	makeEmptyMessage() {
-		return (
-			<div className='list-box-empty-msg-container'>
-				<h3 className='list-box-empty-msg-header'>
-					It looks like you haven't selected anything.
-				</h3>
-			</div>
-		)
-	}
 }
 
 const mapStateToProps = state => ({
-	airports: state.airports,
+	cities: state.cities,
 	updated: new Date()
 });
 

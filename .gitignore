@@ -3,6 +3,7 @@ gcloud/
 
 front/build/
 front/node_modules/
+front/.env
 
 api/node_modules/
 
