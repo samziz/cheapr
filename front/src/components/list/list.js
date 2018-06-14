@@ -17,6 +17,8 @@ class List extends React.PureComponent {
 				{route && this.makeRoute(route, cities)}
 				{!route && cities && this.makeList(cities)}
 
+				{route && <h2 className='cost-label'>Total cost: £{route.cost}</h2>}
+
 				<div className='list-box-list-button-container'>
 
 					<div className='list-box-dates-container'>
@@ -35,7 +37,10 @@ class List extends React.PureComponent {
 					<button 
 						className='list-box-list-button' 
 						disabled={!cities || cities.length === 0}
-						onClick={route ? this.props.onSubmit : this.props.onClear}
+						onClick={() => {
+							if (!route) this.props.onSubmit();
+							else this.props.onClear();
+						}}
 						style={{ backgroundColor: route ? '#c8c8c8' : '#2d95c9' }}
 					>
 						{route && 'Clear'}

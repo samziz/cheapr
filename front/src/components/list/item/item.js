@@ -2,8 +2,6 @@ import './item.css';
 import React from 'react';
 
 export default props => {
-	if (!props.city) return null;
-
 	function makeItem(props) {
 		return (
 			<div className='list-box-list-item'>
@@ -36,11 +34,12 @@ export default props => {
 	function makeRouteItem(props) {
 		return (
 			<div className='list-box-list-item'>
-				<span className='list-box-list-item-span'>
-					<h3 className='list-box-list-item-title'>
-						{props.origin.title} to {props.destination.title}
-					</h3>
-				</span>
+				<h3 className='list-box-list-item-title'>
+					{props.origin.title} to {props.destination.title}
+				</h3>
+				<p>
+					{props.date}
+				</p>
 			</div>
 		)
 	}
