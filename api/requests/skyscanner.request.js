@@ -11,7 +11,7 @@ class Skyscanner {
 
 	async getPrices(orig, dest, start, end) {
 		const months = this._makePartialDatesList(start, end);
-		
+
 		let results = await Promise.all(months.map(month => new Promise((resolve, reject) => {
 			const query = this._formatUrlQuery(['GB', 'gbp', 'en-US', orig, dest, month]);
 
@@ -21,8 +21,9 @@ class Skyscanner {
 					const dates = res.data.Dates.OutboundDates;
 					resolve(dates);
 				})
+				.catch(err => console.log(err));
 		})));
-		
+
 		// Flatten 2D array of API responses
 		results = [].concat(results);
 		results = results[0];
@@ -46,7 +47,7 @@ class Skyscanner {
 		const start = moment(startDate);
 		const end = moment(endDate);
 
-		for (start; !start.isSame(end, 'month'); start.add(1, 'month')) {
+		for (start; !(moment(start).subtract(1, 'months').isSame(end, 'month')); start.add(1, 'month')) {
 			const month = start.format('YYYY-MM');
 		   	list.push(month);
 		}

@@ -11,7 +11,8 @@ store = createStore(
 );
 
 store.subscribe(() => {
-    saveState(store.getState());
+	const state = store.getState();
+    saveState(state);
 });
 
 export default store;

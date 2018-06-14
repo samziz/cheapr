@@ -2,18 +2,44 @@ import { connect } from 'react-redux';
 import Item from './item/item';
 import './list.css';
 import React from 'react';
+import { setStart, setEnd } from '../../redux/actions';
 
 class List extends React.PureComponent {
 
 	render() {
-		const { cities } = this.props;
+		let { cities, route } = this.props;
+
+		if (route.length === 0) route = false;
 
 		return (
 			<div className='list-box-container'>
-				{cities && this.makeList(cities)}
+
+				{route && this.makeRoute(route, cities)}
+				{!route && cities && this.makeList(cities)}
+
 				<div className='list-box-list-button-container'>
-					<button className='list-box-list-button' disabled={cities.length === 0}>
-						Find route
+
+					<div className='list-box-dates-container'>
+						<input
+							type='date' 
+							title='Start date'
+							onChange={ev => this.props.setStart(ev.target.value)}
+						/>
+						<input
+							type='date'
+							title='End date'
+							onChange={ev => this.props.setEnd(ev.target.value)}
+						/>
+					</div>
+
+					<button 
+						className='list-box-list-button' 
+						disabled={!cities || cities.length === 0}
+						onClick={route ? this.props.onSubmit : this.props.onClear}
+						style={{ backgroundColor: route ? '#c8c8c8' : '#2d95c9' }}
+					>
+						{route && 'Clear'}
+						{!route && 'Calculate'}
 					</button>
 				</div>
 			</div>
@@ -22,13 +48,33 @@ class List extends React.PureComponent {
 
 	makeList(cities) {
 		const items = cities.map(city => (
-			<Item city={city} onChange={val => this.props.setDays(city.title, val)} />
+			<Item 
+				city={city} 
+				onChange={val => this.props.setDays(city.title, val)} 
+				onRemove={val => this.props.remove(city.title)}
+			/>
 		));
 
 		return (
 			<div className='list-box-list-container'>
 				{items}
-				
+			</div>
+		)
+	}
+
+	makeRoute(route, cities) {
+		const items = route.route.map(trip => (
+			<Item 
+				routeItem={true}
+				origin={cities.find(city => city.code === trip.trip[0])}
+				destination={cities.find(city => city.code === trip.trip[1])}
+				date={trip.date}
+			/>
+		));
+
+		return (
+			<div className='list-box-list-container'>
+				{items}
 			</div>
 		)
 	}
@@ -37,7 +83,10 @@ class List extends React.PureComponent {
 
 const mapStateToProps = state => ({
 	cities: state.cities,
+	route: state.route,
 	updated: new Date()
 });
 
-export default connect(mapStateToProps)(List);
+const mapDispatchToProps = { setStart, setEnd };
+
+export default connect(mapStateToProps, mapDispatchToProps)(List);

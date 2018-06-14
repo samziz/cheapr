@@ -1,10 +1,11 @@
+import APIRequest from './requests/api.request';
 import './App.css';
 import { connect } from 'react-redux';
 import List from './components/list/list';
 import Map from './components/map/map';
 import React from 'react';
 import Search from './components/search/search';
-import { setItems } from './redux/actions';
+import { setCities, setRoute } from './redux/actions';
 import { getCoordsFromString } from './utils';
 
 class App extends React.PureComponent {
@@ -15,7 +16,12 @@ class App extends React.PureComponent {
         <div style={{ display: 'flex' }}>
           <div className='container left'>
             <Search onSubmit={apt => this.add(apt)}/>
-            <List setDays={(title, val) => this.setDays(title, val)} />
+            <List 
+              remove={title => this.remove(title)}
+              setDays={(title, val) => this.setDays(title, val)}
+              onSubmit={() => this.getRoute()}
+              onClear={() => this.props.setRoute([])}
+            />
           </div>
           <div className='container right'>
             <Map />
@@ -31,33 +37,41 @@ class App extends React.PureComponent {
     );
   }
 
+  async getRoute() {
+    const { cities, start, end } = this.props;
+    const req = new APIRequest();
+    req.getRoute(cities, { start, end }).then(route => {
+      this.props.setRoute(route);
+    })
+  }
+
   async add(title) {
-    const { cities, setItems } = this.props;
+    const { cities, setCities } = this.props;
 
     if (cities && cities.some(apt => apt.title === title)) {
       alert("Cannot enter the same city twice");
       return;
     }
 
-    const airport = await this.format(title);
-    cities.push(airport);
+    const city = await this.format(title);
+    cities.push(city);
 
-    setItems(cities);
+    setCities(cities);
   }
 
   setDays(title, n) {
-    const { cities, setItems } = this.props;
+    const { cities, setCities } = this.props;
 
     const i = cities.findIndex(city => city.title === title);
     cities[i].days = n;
 
-    setItems(cities);
+    setCities(cities);
   }
 
   remove(title) {
-    let { cities, setItems } = this.props;
+    let { cities, setCities } = this.props;
     cities = cities.filter(apt => apt.title !== title);
-    setItems(cities);
+    setCities(cities);
   }
 
   async format(title, days=1) {
@@ -76,6 +90,6 @@ class App extends React.PureComponent {
 
 const mapStateToProps = state => state;
 
-const mapDispatchToProps = { setItems };
+const mapDispatchToProps = { setCities, setRoute };
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);

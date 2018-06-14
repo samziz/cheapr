@@ -32,7 +32,7 @@
 		font-weight: 400;
 	}
 	
-	input::-webkit-calendar-picker-indicator {
+	.search-box-container input::-webkit-calendar-picker-indicator {
   		display: none;
 	}
 

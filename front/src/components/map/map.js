@@ -18,16 +18,13 @@ class MapContainer extends React.PureComponent {
 	render() {
 		const { cities, route } = this.props;
 
-		const googleMapURL = "https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places?key="
-		 + process.env.REACT_APP_GMAPS_KEY;
-
 		return (
 			<div className='map-box-container'>
 				<Map
 					loadingElement={<div className='g-map-container' />}
   					containerElement={<div className='g-map-container' />}
   					mapElement={<div className='g-map-container' />}
-  					googleMapURL={googleMapURL}
+  					googleMapURL={window.googleMapURL}
   					markers={this.makeMarkers(cities)}
   					route={this.makeRoute(route)}
   				/>
