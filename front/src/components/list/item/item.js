@@ -23,9 +23,17 @@ export default props => {
 						id='numOfDays' 
 						type='number'
 						placeholder={1}
-						onChange={ev => props.onChange(ev.target.value)}
+						min={1}
+						onChange={ev => props.onChange({ days: ev.target.value })}
 					/>
-					<label for='numOfDays'>days</label>
+					<label>days, give or take</label>
+					<input
+						id='giveOrTake' 
+						type='number'
+						placeholder={0}
+						min={0}
+						onChange={ev => props.onChange({ giveOrTake: ev.target.value })}
+					/>
 				</div>
 			</div>
 		)

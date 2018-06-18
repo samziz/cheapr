@@ -9,22 +9,23 @@ exports.findRoute = async (req, res) => {
 	// Read array of cities in IATA format from request
 	let { cities, dates } = req.body;
 
-	const codes = cities.map(apt => apt.code);
+	const codes = cities.map(city => city.title.toLowerCase().substring(0,3));
 	const perms = permute(codes, 2);
 
-	const apiPromises = perms.map(perm => new Promise(resolve => {
-		Skyscanner
-			.getPrices(perm[0], perm[1], dates.start, dates.end)
-			.then(prices => resolve({
-				trip: perm,
-				prices
-			}))
-			.catch(err => console.error('ERR!:',err))
-	}))
-
-	const routes = await Promise.all(apiPromises);
+	const routes = await Promise.all(
+		perms.map(perm => new Promise(resolve => {
+			Skyscanner
+				.getPrices(perm[0], perm[1], dates.start, dates.end)
+				.then(prices => resolve({
+					trip: perm,
+					prices
+				}))
+				.catch(err => console.error(err))
+		}))
+	)
 
 	const route = optimise(cities, routes, dates.start);
+
 	res.json(route);
 }
 
@@ -61,6 +62,7 @@ function permute(arr, n) {
     	}, [ [] ]);
 	}
 
+	// If user doesn't specify a permutation size, set permutation size to array length
     n = n || arr.length;
 
     for (var j = 0, inds=[]; j < n; j++) { 
@@ -74,6 +76,30 @@ function permute(arr, n) {
     arrangements = arrangements.filter(arr => arr.length === new Set(arr).size);
 
     return arrangements;
+}
+
+function findOptimalDate(list, date, error=3) {
+	// Finds all available dates within some margin of error n, and selects 
+	// the cheapest date. NB this algorithm gives no weight to the error 
+	// value. A perfect fit will lose out to a cheaper flight n days later.
+
+	let fits = [];
+
+	list.find(entry => {
+		const diff = moment(entry.PartialDate).diff(date, 'days');
+
+		if (diff <= error) {
+			dates.push({ 
+				date: entry.PartialDate, 
+				error: diff, 
+				price: entry.Price 
+			});
+		}
+	});
+
+	fits = fits.sort((a, b) => a.price > b.price);
+
+	return fits[0];
 }
 
 function optimise(prefs, routes, startDate) {
@@ -102,44 +128,42 @@ function calculate(route, data, prefs, startDate) {
 		permutation and return null if cost
 		can't be calculated from dates.
 
-		ROUTE: [ [a, b], [b, c] ... ]
-		DATA: [ {  } ]
+		ROUTE: [ [a, b], ... ]
+		DATA: [ {  }, ... ]
 	*/
 
-	let cost = 0;
-	let date = moment(startDate);
-	let finalRoute = [];
+	let totalCost = 0,
+		dateCounter = moment(startDate),
+		finalRoute = [];
 
 	for (let [index, stop] of route.entries()) {
 		const nextStop = route[index+1];
 		if (!nextStop) break;
 
-		const tripGrid = data.find(datum => datum.trip = [stop, nextStop]);
+		const prefThisStop = prefs.find(city => city.code === nextStop).time;
+		const prefNextStop = prefs.find(city => city.code === nextStop).time;
 
-		const tripGridDate = tripGrid.prices.find(datum => {
-			if (moment(datum.PartialDate) === date) return true;
-			
-			const diff = moment(datum.PartialDate).diff(date, 'days');
+		// Get list of dates and prices for this particular trip
+		const tripGrid = data.find(entry => entry.trip === [stop, nextStop]);
 
-			if (diff < 3) {
-				date.add(diff, 'days');
-				return true;
-			};
-		});
-		
-		// TODO: Support flexible scheduling
-		if (!tripGridDate) return null;
+		const { cost, date, error } = findOptimalDate(
+			// Find cheapest trip from list given ideal date (totalDate) and margin of error
+			tripGrid.prices, dateCounter, prefThisStop.giveOrTake
+		);
 
-		cost += tripGridDate.Price;
+		if (!date) return null;
+		if (error) dateCounter.add(error, 'days');
+		totalCost += cost;
 
 		finalRoute.push({
+			cost,
+			date,
 			trip: [stop, nextStop],
-			date
 		});
 
 		// Advance date by time spent in destination
-		const stopPref = prefs.find(city => city.code === stop);
-		date.add(stopPref.days, 'days');
+		// We can safely assume prefs.find(fn) returns a city object
+		dateCounter.add(prefNextStop.days, 'days');
 	}
 
 	return {

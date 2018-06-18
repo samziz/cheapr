@@ -1,7 +1,9 @@
-input[type='date'] {
+input[type='date'], input[type='number'] {
 	height: 30px;
-	width: 49%;
+	width: 100%;
+
 	box-sizing: border-box;
+	padding-left: 5px;
 
 	border-radius: 4px;
 	border: 1px solid rgb(220, 220, 220);
@@ -10,13 +12,30 @@ input[type='date'] {
 	font-size: 16px;
 }
 
+label {
+	font-size: 12px;
+	margin: 0px 2px 2px;
+	font-weight: 400;
+	color: grey;
+}
+
+select {
+	height: 30px;
+	background-color: white;
+
+	font-size: 14px;
+
+	border-radius: 4px;
+	border: 1px solid rgb(220,220,220);
+}
+
 .list-box-container {
-	height: calc(100% - 172px);
+	height: calc(100% - 132px);
 	width: 100%;
 	position: relative;
 
 	margin-top: 12px;
-	padding-top: 10px;
+	padding: 20px 20px;
 	border-radius: 5px;
 	box-sizing: border-box;
 	overflow: none;
@@ -29,11 +48,10 @@ input[type='date'] {
 }
 
 .list-box-list-button-container {
-	height: 100px;
 	width: 100%;
 	position: absolute;
-	bottom: 0;
-	padding: 0 5%;
+	bottom: 20px;
+	padding: 0 5px;
 }
 
 .list-box-list-button {
@@ -56,23 +74,34 @@ input[type='date'] {
 		background-color: #e0e0e0;
 	}
 
-.list-box-dates-container {
+.list-box-options-container {
 	margin-bottom: 10px;
 	width: 90%;
 	box-sizing: border-box;
 
 	display: flex;
-	justify-content: space-between;
-}
-
-.list-box-empty-msg-container {
-	padding: 10px;
-}
-
-.list-box-empty-msg-header {
-	font-weight: 500;
+	flex-direction: column;
 }
 
 .cost-label {
 	text-align: center;
+}
+
+.date-input.date {
+	width: 73%;
+}
+
+.date-input.margin {
+	width: 25%;
+	position: relative;
+}
+
+.date-input.margin-text {
+	position: absolute;
+	top: 8px;
+	left: 60px;
+
+	color: grey;
+
+	user-select: none;
 }

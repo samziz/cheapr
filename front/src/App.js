@@ -1,12 +1,12 @@
 import APIRequest from './requests/api.request';
 import './App.css';
+import { capitalise, getCoordsFromString } from './utils'
 import { connect } from 'react-redux';
 import List from './components/list/list';
 import Map from './components/map/map';
 import React from 'react';
 import Search from './components/search/search';
 import { setCities, setRoute } from './redux/actions';
-import { getCoordsFromString } from './utils';
 
 class App extends React.PureComponent {
 
@@ -18,7 +18,7 @@ class App extends React.PureComponent {
             <Search onSubmit={apt => this.add(apt)}/>
             <List 
               remove={title => this.remove(title)}
-              setDays={(title, val) => this.setDays(title, val)}
+              update={(title, opts) => this.update(title, opts)}
               onSubmit={() => this.getRoute()}
               onClear={() => this.props.setRoute([])}
             />
@@ -29,8 +29,8 @@ class App extends React.PureComponent {
         </div>
         <div className='footer'>
           <p className='footer-text'>
-            Made with ❤️by Sam. See the project on 
-            Github <a href='http://www.github.com/samziz/cheapr'>here</a>.
+            Made with ❤️by Sam. You can contribute on Github
+            <a href='http://www.github.com/samziz/cheapr'> here</a>.
           </p>
         </div>
       </div>
@@ -48,7 +48,7 @@ class App extends React.PureComponent {
   async add(title) {
     const { cities, setCities } = this.props;
 
-    if (cities && cities.some(apt => apt.title === title)) {
+    if (cities && cities.some(apt => apt.title.toLowerCase() === title.toLowerCase())) {
       alert("Cannot enter the same city twice");
       return;
     }
@@ -59,11 +59,12 @@ class App extends React.PureComponent {
     setCities(cities);
   }
 
-  setDays(title, n) {
+  update(title, opts) {
     const { cities, setCities } = this.props;
 
     const i = cities.findIndex(city => city.title === title);
-    cities[i].days = n;
+    
+    Object.assign(cities[i], opts);
 
     setCities(cities);
   }
@@ -75,14 +76,12 @@ class App extends React.PureComponent {
   }
 
   async format(title, days=1) {
-    const code = title.toLowerCase().substring(0,4);
-    const location = await getCoordsFromString(title);
+    const { location, name } = await getCoordsFromString(title);
 
     return {
-      title,
-      code,
+      title: name,
       days,
-      location
+      location: location
     }
   }
 

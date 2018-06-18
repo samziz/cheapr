@@ -19,7 +19,10 @@ export default function search(props) {
 				list='cities'
 				placeholder='Add a stop'
 				onKeyDown={(ev, val) => {
-					if (ev.keyCode === 13) props.onSubmit(ev.target.value)
+					if (ev.keyCode === 13) {
+						props.onSubmit(ev.target.value);
+						ev.target.value = "";
+					}
 				}}
 			/>
 			<datalist id='cities'>
