@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { getCityByCode } from '../../utils';
 import { GoogleMap, Marker, Polyline, withScriptjs, withGoogleMap } from 'react-google-maps';
 import './map.css';
 import React from 'react';
@@ -16,8 +17,10 @@ const Map = withScriptjs(withGoogleMap(props =>
 class MapContainer extends React.PureComponent {
 
 	render() {
-		const { cities, route } = this.props;
+		let { cities, route } = this.props;
 
+		if (route.length === 0) route = false;
+		
 		return (
 			<div className='map-box-container'>
 				<Map
@@ -26,7 +29,7 @@ class MapContainer extends React.PureComponent {
   					mapElement={<div className='g-map-container' />}
   					googleMapURL={window.googleMapURL}
   					markers={this.makeMarkers(cities)}
-  					route={this.makeRoute(route)}
+  					route={this.makeRoute(route, cities)}
   				/>
 			</div>
 		)
@@ -35,14 +38,27 @@ class MapContainer extends React.PureComponent {
 	makeMarkers(cities) {
 		if (!cities) return null;
 		return cities.map((city, i) => (
-			<Marker key={i} position={city.location} />
+			<Marker 
+				key={i} 
+				position={city.location} 
+			/>
 		))
 	}
 
-	makeRoute(route) {
+	makeRoute(route, cities) {
 		if (!route) return null;
 
-		return <Polyline opts={route.path} />
+		let path = route.route
+			.map(flight => getCityByCode(flight.trip[0], cities).location);
+
+		// Add destination of last trip to path
+		const destination = route.route[route.route.length-1].trip[1];
+		path.push(getCityByCode(destination, cities).location);
+
+		return <Polyline 
+			path={path} 
+			options={{ strokeColor: 'rgb(0, 194, 226)' }} 
+		/>
 	}
 }
 

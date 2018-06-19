@@ -9,26 +9,25 @@ class Skyscanner {
 		this.axios = axios.create(axiosConfig(token));
 	}
 
-	async getPrices(orig, dest, start, end) {
-		const months = this._makePartialDatesList(start, end);
+	async getPrices(orig, dest, start, days) {
+		const months = this._makePartialDatesList(start);
 
-		let results = await Promise.all(months.map(month => new Promise((resolve, reject) => {
-			const query = this._formatUrlQuery(['GB', 'gbp', 'en-US', orig, dest, month]);
+		let results = await Promise.all(
+			months.map(month => new Promise((resolve, reject) => {
+				const query = this._formatUrlQuery(['GB', 'gbp', 'en-US', orig, dest, month]);
 
-			this.axios
-				.get(`browsedates/v1.0/${query}?apikey=${this.token}`)
-				.then(res => {
-					const dates = res.data.Dates.OutboundDates;
-					resolve(dates);
-				})
-				.catch(err => console.log(err));
-		})));
+				this.axios
+					.get(`browsedates/v1.0/${query}?apikey=${this.token}`)
+					.then(res => {
+						const dates = res.data.Dates.OutboundDates;
+						resolve(dates);
+					})
+			})
+		));
 
 		// Flatten 2D array of API responses
 		results = [].concat(results);
 		results = results[0];
-
-		results = this._stripBadDates(results, start, end);
 
 		return results;
 	}
@@ -45,21 +44,14 @@ class Skyscanner {
 		let list = [];
 
 		const start = moment(startDate);
-		const end = moment(endDate);
 
-		for (start; !(moment(start).subtract(1, 'months').isSame(end, 'month')); start.add(1, 'month')) {
+		for (let i = 0; i < 3; i++) {
 			const month = start.format('YYYY-MM');
 		   	list.push(month);
+		   	start.add(1, 'month');
 		}
 
 		return list;
-	}
-
-	_stripBadDates(list, startDate, endDate) {
-		return list
-			.filter(item => {
-				return moment(item.PartialDate, 'YYYY-MM-DD').isBetween(startDate, endDate);
-			})
 	}
 }
 

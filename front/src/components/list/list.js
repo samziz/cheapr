@@ -1,8 +1,9 @@
 import { connect } from 'react-redux';
 import Item from './item/item';
 import './list.css';
+import { makeCode } from '../../utils';
 import React from 'react';
-import { setStart, setEnd } from '../../redux/actions';
+import { setStartDate, setStartMargin } from '../../redux/actions';
 
 
 class List extends React.PureComponent {
@@ -18,8 +19,6 @@ class List extends React.PureComponent {
 				{route && this.makeRoute(route, cities)}
 				{!route && cities && this.makeList(cities)}
 
-				{route && <h2 className='cost-label'>Total cost: £{route.cost}</h2>}
-
 				{this.makeSubmitArea(this.props)}
 			</div>
 		)
@@ -29,8 +28,8 @@ class List extends React.PureComponent {
 		const items = cities.map(city => (
 			<Item 
 				city={city} 
-				onChange={opts => this.props.update(city.title, opts)} 
-				onRemove={val => this.props.remove(city.title)}
+				onChange={opts => this.props.update(city.name, opts)} 
+				onRemove={val => this.props.remove(city.name)}
 			/>
 		));
 
@@ -45,8 +44,8 @@ class List extends React.PureComponent {
 		const items = route.route.map(trip => (
 			<Item 
 				routeItem={true}
-				origin={cities.find(city => city.code === trip.trip[0])}
-				destination={cities.find(city => city.code === trip.trip[1])}
+				origin={cities.find(city => makeCode(city) === trip.trip[0])}
+				destination={cities.find(city => makeCode(city) === trip.trip[1])}
 				date={trip.date}
 			/>
 		));
@@ -54,6 +53,7 @@ class List extends React.PureComponent {
 		return (
 			<div className='list-box-list-container'>
 				{items}
+				<h2 className='cost-label'>Total cost: £{route.cost}</h2>
 			</div>
 		)
 	}
@@ -72,7 +72,7 @@ class List extends React.PureComponent {
 							<input
 								type='date' 
 								title='Start date'
-								onChange={ev => this.props.setStart(ev.target.value)}
+								onChange={ev => this.props.setStartMargin(ev.target.value)}
 							/>
 						</div>
 						<div className='date-input margin'>
@@ -82,7 +82,7 @@ class List extends React.PureComponent {
 								placeholder={0}
 								min={0}
 								max={20}
-								onChange={ev => this.props.setStart(ev.target.value)}
+								onChange={ev => this.props.setStartDate(ev.target.value)}
 							/>
 							<p className='date-input margin-text'>
 								days
@@ -93,13 +93,13 @@ class List extends React.PureComponent {
 					<label>I want to depart from:</label>
 					<select>
 					  <option value={undefined}>No preference</option>
-					  {cities.map(city => <option value={city.title}>{city.title}</option>)}
+					  {cities.map(city => <option value={city.name}>{city.name}</option>)}
 					</select>
 
 					<label>I want to return to:</label>
 					<select>
 					  <option value={undefined}>No preference</option>
-					  {cities.map(city => <option value={city.title}>{city.title}</option>)}
+					  {cities.map(city => <option value={city.name}>{city.name}</option>)}
 					</select>
 				</div>
 
@@ -127,6 +127,6 @@ const mapStateToProps = state => ({
 	updated: new Date()
 });
 
-const mapDispatchToProps = { setStart, setEnd };
+const mapDispatchToProps = { setStartDate, setStartMargin };
 
 export default connect(mapStateToProps, mapDispatchToProps)(List);

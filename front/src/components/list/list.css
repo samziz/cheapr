@@ -47,6 +47,14 @@ select {
 	box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
 }
 
+.list-box-list-container {
+	height: calc(100% - 200px);
+	padding: 5px;
+	padding-bottom: 15px;
+	box-sizing: border-box;
+	overflow: scroll;
+}
+
 .list-box-list-button-container {
 	width: 100%;
 	position: absolute;

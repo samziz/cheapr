@@ -12,15 +12,25 @@ export default function (state = initialState, action) {
     		...state,
     		route: action.payload
     	};
-    case 'SET_START':
+    case 'SET_START_DATE':
         return {
             ...state,
-            start: action.payload
+            dates: {
+            	start: {
+            		...state.start,
+            		date: action.payload
+            	}
+            }
         }
-    case 'SET_END': 
-        return {
+    case 'SET_START_MARGIN':
+    	return {
             ...state,
-            end: action.payload
+            dates: {
+            	start: {
+            		...state.start,
+            		giveOrTake: action.payload
+            	}
+            }
         }
     default:
         return state;

@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "concurrently \"cd api && npm start\" \"cd front && npm run build && npm start\""
+    "start": "concurrently \"cd api && npm start\" \"cd front && npm run build && npm start\"",
+    "restart": "(cd api && npm start) & (cd front && npm start)"
   },
   "dependencies": {
     "axios": "^0.18.0",

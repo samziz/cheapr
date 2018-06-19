@@ -1,4 +1,6 @@
 module.exports = {
 	cities: [],
-	route: []
+	dates: [],
+	route: [],
+	prefs: {},
 }

@@ -41,3 +41,8 @@ input#numOfDays, input#giveOrTake {
 		font-weight: 500;
 		margin: 0px 0px 0px;
 	}
+
+.list-box-list-item-date {
+	font-size: 14px;
+	margin-bottom: 0;
+}

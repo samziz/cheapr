@@ -38,50 +38,50 @@ class App extends React.PureComponent {
   }
 
   async getRoute() {
-    const { cities, start, end } = this.props;
+    const { cities, dates, prefs } = this.props;
     const req = new APIRequest();
-    req.getRoute(cities, { start, end }).then(route => {
+    req.getRoute(cities, dates, prefs).then(route => {
       this.props.setRoute(route);
     })
   }
 
-  async add(title) {
+  async add(name) {
     const { cities, setCities } = this.props;
 
-    if (cities && cities.some(apt => apt.title.toLowerCase() === title.toLowerCase())) {
+    if (cities && cities.some(apt => apt.name.toLowerCase() === name.toLowerCase())) {
       alert("Cannot enter the same city twice");
       return;
     }
 
-    const city = await this.format(title);
+    const city = await this.format(name);
     cities.push(city);
 
     setCities(cities);
   }
 
-  update(title, opts) {
+  update(name, opts) {
     const { cities, setCities } = this.props;
 
-    const i = cities.findIndex(city => city.title === title);
+    const i = cities.findIndex(city => city.name === name);
     
     Object.assign(cities[i], opts);
 
     setCities(cities);
   }
 
-  remove(title) {
+  remove(name) {
     let { cities, setCities } = this.props;
-    cities = cities.filter(apt => apt.title !== title);
+    cities = cities.filter(apt => apt.name !== name);
     setCities(cities);
   }
 
-  async format(title, days=1) {
-    const { location, name } = await getCoordsFromString(title);
+  async format(string, days=1) {
+    const { location, name } = await getCoordsFromString(string);
 
     return {
-      title: name,
+      name,
       days,
-      location: location
+      location
     }
   }
 

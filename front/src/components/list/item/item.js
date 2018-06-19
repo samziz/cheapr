@@ -7,7 +7,7 @@ export default props => {
 			<div className='list-box-list-item'>
 				<span className='list-box-list-item-span'>
 					<h3 className='list-box-list-item-title'>
-						{props.city.title}
+						{props.city.name}
 					</h3>
 				</span>
 
@@ -42,10 +42,12 @@ export default props => {
 	function makeRouteItem(props) {
 		return (
 			<div className='list-box-list-item'>
-				<h3 className='list-box-list-item-title'>
-					{props.origin.title} to {props.destination.title}
-				</h3>
-				<p>
+				<span className='list-box-list-item-span'>
+					<h3 className='list-box-list-item-title'>
+						{props.origin.name} to {props.destination.name}
+					</h3>
+				</span>
+				<p className='list-box-list-item-date'>
 					{props.date}
 				</p>
 			</div>

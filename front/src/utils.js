@@ -18,3 +18,11 @@ export const getCoordsFromString = async string => {
         throw new Error('Error: Badly formatted response from Geocode API');
     }
 };
+
+export const getCityByCode = (code, cities) => {
+    return cities.find(city => makeCode(city) === code);
+}
+
+export const makeCode = city => {
+    return city.name.toLowerCase().substring(0, 4);
+}
