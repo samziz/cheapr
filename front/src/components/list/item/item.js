@@ -43,9 +43,9 @@ export default props => {
 		return (
 			<div className='list-box-list-item'>
 				<span className='list-box-list-item-span'>
-					<h3 className='list-box-list-item-title'>
+					<a className='list-box-list-item-title' href={props.url}>
 						{props.origin.name} to {props.destination.name}
-					</h3>
+					</a>
 				</span>
 				<p className='list-box-list-item-date'>
 					{props.date}

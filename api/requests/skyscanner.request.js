@@ -13,15 +13,26 @@ class Skyscanner {
 		const months = this._makePartialDatesList(start);
 
 		let results = await Promise.all(
-			months.map(month => new Promise((resolve, reject) => {
-				const query = this._formatUrlQuery(['GB', 'gbp', 'en-US', orig, dest, month]);
+			months.map(month => new Promise(async (resolve, reject) => {
+				try {
+					const [ origCode, destCode ] = await Promise.all([ 
+						this.getCode(orig), 
+						this.getCode(dest) 
+					]);
+					
+					const query = this._formatUrlQuery([
+						'GB', 'gbp', 'en-US', origCode, destCode, month
+					]);
 
-				this.axios
-					.get(`browsedates/v1.0/${query}?apikey=${this.token}`)
-					.then(res => {
-						const dates = res.data.Dates.OutboundDates;
-						resolve(dates);
-					})
+					this.axios
+						.get(`browsedates/v1.0/${query}?apikey=${this.token}`)
+						.then(res => {
+							const dates = res.data.Dates.OutboundDates;
+							resolve(dates);
+						});
+				} catch (error) {
+					reject(error)
+				}
 			})
 		));
 
@@ -30,6 +41,15 @@ class Skyscanner {
 		results = results[0];
 
 		return results;
+	}
+
+	async getCode(string) {
+		return this.axios
+			.get(`autosuggest/v1.0/UK/GBP/en-GB/?query=${string}&apiKey=${this.token}`)
+			.then(res => {
+				const fullCodeString = res.data.Places[0].PlaceId;
+				return fullCodeString.replace('-sky','').toLowerCase();
+			});
 	}
 
 

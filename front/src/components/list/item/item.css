@@ -1,3 +1,8 @@
+a {
+	color: rgb(21, 151, 211);
+	text-decoration: none;
+}
+
 span {
 	display: flex;
 	align-items: center; 

@@ -49,11 +49,11 @@ class MapContainer extends React.PureComponent {
 		if (!route) return null;
 
 		let path = route.route
-			.map(flight => getCityByCode(flight.trip[0], cities).location);
+			.map(flight => cities.find(city => city.name === flight.trip[0]).location);
 
 		// Add destination of last trip to path
 		const destination = route.route[route.route.length-1].trip[1];
-		path.push(getCityByCode(destination, cities).location);
+		path.push(cities.find(city => city.name === destination).location);
 
 		return <Polyline 
 			path={path} 

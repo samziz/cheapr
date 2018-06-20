@@ -5,48 +5,60 @@ const SkyscannerRequest = require('../requests/skyscanner.request');
 
 
 exports.findRoute = async (req, res) => {
-	const Skyscanner = new SkyscannerRequest(SKYSCANNER_KEY);
+	try {
+		const Skyscanner = new SkyscannerRequest(SKYSCANNER_KEY);
 
-	let { cities, dates, prefs } = req.body;
+		let { cities, dates, prefs } = req.body;
 
-	const codes = cities.map(city => makeCode(city));
-	const perms = permute(codes, 2);
+		const names = cities.map(city => city.name);
+		const perms = permute(names, 2);
 
-	const routes = await Promise.all(
-		perms.map(trip => new Promise(resolve => {
-			Skyscanner
-				.getPrices(trip[0], trip[1], dates.start.date)
-				.then(prices => resolve({ trip, prices }))
-				.catch(err => console.error(err))
-		}))
-	)
+		const routes = await Promise.all(
+			perms.map(trip => new Promise((resolve, reject) => {
+				Skyscanner
+					.getPrices(trip[0], trip[1], dates.start.date)
+					.then(prices => resolve({ trip, prices }))
+					.catch(err => reject(err))
+			}))
+		)
 
-	const evaluatedRoutes = optimise(cities, routes, dates.start.date, prefs);
+		const evaluatedRoutes = optimise(cities, routes, dates.start.date, prefs);
 
-	res.json(evaluatedRoutes[0]);
+		res.json(evaluatedRoutes[0]);
+	} catch (error) {
+		console.error(error.stack || error);
+		res.status(500);
+		res.send(); 
+	}
 }
 
 exports.listRoutes = async (req, res) => {
-	const Skyscanner = new SkyscannerRequest(SKYSCANNER_KEY);
+	try {
+		const Skyscanner = new SkyscannerRequest(SKYSCANNER_KEY);
 
-	let { cities, dates, prefs } = req.body;
+		let { cities, dates, prefs } = req.body;
 
-	const codes = cities.map(city => makeCode(city));
-	const perms = permute(codes, 2);
+		const codes = cities.map(city => makeCode(city.name));
+		const perms = permute(codes, 2);
 
-	const routes = await Promise.all(
-		perms.map(trip => new Promise(resolve => {
-			Skyscanner
-				.getPrices(trip[0], trip[1], dates.start.date)
-				.then(prices => resolve({ trip, prices }))
-				.catch(err => console.error(err))
-		}))
-	)
+		const routes = await Promise.all(
+			perms.map(trip => new Promise(resolve => {
+				Skyscanner
+					.getPrices(trip[0], trip[1], dates.start.date)
+					.then(prices => resolve({ trip, prices }))
+					.catch(err => console.error(err))
+			}))
+		)
 
-	const evaluatedRoutes = optimise(cities, routes, dates.start.date, prefs);
-	evaluatedRoutes.map((route, index) => evaluatedRoutes[index].rank = index);
+		const evaluatedRoutes = optimise(cities, routes, dates.start.date, prefs);
+		evaluatedRoutes.map((route, index) => evaluatedRoutes[index].rank = index);
 
-	res.json(evaluatedRoutes);
+		res.json(evaluatedRoutes);
+	} catch (error) {
+		console.error(error.stack || error);
+		res.status(500);
+		res.send(error); 
+	}
 }
 
 
@@ -110,10 +122,8 @@ function findOptimalDate(list, date, error=0) {
 	// value. A perfect fit will lose out to a cheaper flight n days later.
 
 	let fits = [];
-
 	list.find(entry => {
-		const diff = moment(entry.PartialDate).diff(date, 'days');
-
+		const diff = Math.abs( moment(entry.PartialDate).diff(date, 'days') );
 		if (diff <= error) {
 			fits.push({ 
 				date: entry.PartialDate, 
@@ -136,15 +146,15 @@ function optimise(cities, routes, startDate, prefs) {
 		days in each.
 	*/
 
-	const stops = cities.map(city => makeCode(city));
+	const names = cities.map(city => city.name);
 
-	const possibleRoutes = permute(stops, stops.length);
+	let possibleRoutes = permute(names, names.length);
 
-	if (prefs.departFrom) possibleRoutes = possibleRoutes
-		.filter(route => route[0] === makeCode(prefs.departFrom));
+	if (prefs && prefs.departFrom) possibleRoutes = possibleRoutes
+		.filter(route => route[0] === prefs.departFrom);
 
-	if (prefs.returnTo) possibleRoutes = possibleRoutes
-		.filter(route => route[route.length-1] === makeCode(prefs.returnTo));
+	if (prefs && prefs.returnTo) possibleRoutes = possibleRoutes
+		.filter(route => route[route.length-1] === prefs.returnTo);
 
 	const evaluatedRoutes = possibleRoutes
 		.map(route => calculate(route, routes, cities, prefs, startDate))
@@ -167,46 +177,45 @@ function calculate(route, data, cities, prefs, startDate) {
 	let dateCounter = moment(startDate),
 		finalRoute = [];
 
-	for (let [index, stop] of route.entries()) {
-		const nextStop = route[index+1];
-		if (!nextStop) break;
+	try {
+		for (let [index, stop] of route.entries()) {
+			const nextStop = route[index+1];
+			if (!nextStop) break;
 
-		// We can safely assume that prefs.find(fn) will return a city object
-		const prefThisStop = cities.find(city => makeCode(city) === nextStop);
-		const prefNextStop = cities.find(city => makeCode(city) === nextStop);
+			// We can safely assume that prefs.find(fn) will return a city object
+			const prefThisStop = cities.find(city => city.name === nextStop);
+			const prefNextStop = cities.find(city => city.name === nextStop);
 
-		// Get list of dates and prices for this particular trip
+			// Get list of dates and prices for this particular trip
+			const tripGrid = data
+				.find(entry => entry.trip[0] === stop && entry.trip[1] === nextStop);
 
-		const tripGrid = data
-			.find(entry => entry.trip[0] === stop && entry.trip[1] === nextStop);
+			const { cost, date, error } = findOptimalDate(
+				// Find cheapest trip from list given ideal date (totalDate) and margin of error
+				tripGrid.prices, dateCounter, prefThisStop.giveOrTake
+			);
+			
+			if (error) dateCounter.add(error, 'days');
 
-		const res = findOptimalDate(
-			// Find cheapest trip from list given ideal date (totalDate) and margin of error
-			tripGrid.prices, dateCounter, prefThisStop.giveOrTake
-		);
+			finalRoute.push({
+				cost,
+				date,
+				trip: [stop, nextStop],
+				url: makeBuyUrl([stop, nextStop], date)
+			});
 
-		if (!res) return null;
+			// Advance date by time spent in destination
+			dateCounter.add(prefNextStop.days, 'days');
+		}
 
-		const { cost, date, error } = res;
-		
-		if (!date) return null;
-		if (error) dateCounter.add(error, 'days');
-
-		finalRoute.push({
-			cost,
-			date,
-			trip: [stop, nextStop],
-			url: makeBuyUrl([stop, nextStop], date)
-		});
-
-		// Advance date by time spent in destination
-		dateCounter.add(prefNextStop.days, 'days');
+		return {
+			route: finalRoute,
+			cost: finalRoute.reduce((total, trip) => total + trip.cost, 0)
+		}
+	} catch (error) {
+		return null;
 	}
-	console.log(finalRoute.reduce((total, trip) => total + trip.cost, 0))
-	return {
-		route: finalRoute,
-		cost: finalRoute.reduce((total, trip) => total + trip.cost, 0)
-	}
+	
 }
 
 function makeBuyUrl(trip, date) {
@@ -217,8 +226,11 @@ function makeBuyUrl(trip, date) {
 	return `http://partners.api.skyscanner.net/apiservices/referral/v1.0/GB/gbp/en-us/${orig}/${dst}/${dateString}/${dateString}`
 }
 
-function makeCode(city) {
+function makeCode(name) {
 	// Convert full name of city to IATA format
-	return city.name.toLowerCase().substring(0,4);
+	return name
+		.toLowerCase()
+		.replace(' ', '')
+		.substring(0,4);
 }
 

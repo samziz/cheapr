@@ -44,16 +44,18 @@ class List extends React.PureComponent {
 		const items = route.route.map(trip => (
 			<Item 
 				routeItem={true}
-				origin={cities.find(city => makeCode(city) === trip.trip[0])}
-				destination={cities.find(city => makeCode(city) === trip.trip[1])}
+				origin={cities.find(city => city.name === trip.trip[0])}
+				destination={cities.find(city => city.name === trip.trip[1])}
 				date={trip.date}
+				url={trip.url}
 			/>
 		));
 
 		return (
 			<div className='list-box-list-container'>
 				{items}
-				<h2 className='cost-label'>Total cost: £{route.cost}</h2>
+				<hr className='cost-label-rule' />
+				<h4 className='cost-label'>Total cost: £{route.cost}</h4>
 			</div>
 		)
 	}

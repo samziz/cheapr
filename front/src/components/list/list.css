@@ -93,7 +93,14 @@ select {
 
 .cost-label {
 	text-align: center;
+	color: dimgrey;
+	font-weight: 400;
+	margin-top: 5px;
 }
+
+	.cost-label-rule {
+		width: 70%;
+	}
 
 .date-input.date {
 	width: 73%;
